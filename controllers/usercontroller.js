@@ -6,9 +6,20 @@ class UserController{
         this.tableEl = document.getElementById(tableId);
 
         this.onSubmit();
+        this.onEdit()
+    }
+
+    onEdit(){
+
+        document.querySelector("#box-user-update .btn-cancel").addEventListener('click', e=>{
+
+             this.showPanelCreate()
+
+        });
+
 
     }
-   
+
     onSubmit(){
     
         this.formEl.addEventListener('submit', event =>{
@@ -128,11 +139,11 @@ getvalues(){
         );
     }
 
-     addLine(dataUser){
+    addLine(dataUser){
         
         let tr = document.createElement('tr');
 
-        tr.dataset.user = dataUser;
+        tr.dataset.user = JSON.stringify(dataUser);
 
        tr.innerHTML =   `
                     <td><img src="${dataUser.photo}" alt="User Image" class="img-circle img-sm"></td>
@@ -141,15 +152,51 @@ getvalues(){
                     <td>${(dataUser.admin) ? 'sim' : 'não' }</td>
                     <td>${utils.dateFormat(dataUser.register)}</td>
                     <td>
-                        <button type="button" class="btn btn-primary btn-xs btn-flat">Editar</button>
+                        <button type="button" class="btn btn-primary btn-edit btn-xs btn-flat">Editar</button>
                         <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
                     </td>
             `;  
+            tr.querySelector(".btn-edit").addEventListener('click', e=>{
+
+                let json = JSON.parse(tr.dataset.user);
+                let form = document.querySelector('#form-user-update')
+
+                for (let name in json){
+
+                    let field = form.querySelector('[name='+ name.replace('_', "") +']');
+
+                    console.log(name, field)
+
+                    if (field){
+
+                     if (field.type == 'file') continue;
+                         field.value = json[name];
+                    }
+
+                }
+
+                this.showPanelupdate();
+
+            });
         
             this.tableEl.appendChild(tr);
 
             this.updateCount();
     
+        }
+
+        showPanelCreate(){
+
+            document.querySelector('#box-user-create').style.display = 'block';
+            document.querySelector('#box-user-update').style.display = 'none'; 
+
+        }
+        
+        showPanelupdate(){
+
+            document.querySelector('#box-user-create').style.display = 'none';
+            document.querySelector('#box-user-update').style.display = 'block'; 
+
         }
         
         updateCount(){
@@ -161,9 +208,18 @@ getvalues(){
 
                 numberUsers++
 
-                console.log(tr.dataset.user)
+                let user = JSON.parse(tr.dataset.user);
+
+                if (user._admin) numberAdmin++;
+
+
+
 
             }); 
+            console.log(numberAdmin)
+
+            document.querySelector('#number-users').innerHTML = numberUsers
+            document.querySelector('#number-users-admin').innerHTML = numberAdmin
 
         }
 
